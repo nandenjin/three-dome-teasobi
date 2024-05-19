@@ -60,6 +60,7 @@ scene.add(new AmbientLight(0xffffff, 0.7))
 
 const renderer = new WebGLRenderer({ antialias: true })
 renderer.setSize(window.innerWidth, window.innerHeight)
+renderer.setPixelRatio(window.devicePixelRatio)
 document.body.appendChild(renderer.domElement)
 
 const stats = new Stats()
