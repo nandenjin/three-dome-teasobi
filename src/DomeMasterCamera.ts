@@ -2,6 +2,7 @@ import {
   BufferGeometry,
   Float32BufferAttribute,
   Group,
+  LinearFilter,
   Mesh,
   MeshBasicMaterial,
   Object3D,
@@ -40,9 +41,9 @@ export class DomeMasterCamera extends Object3D {
    *
    * @param near Camera frustum near plane. Default `0.1`.
    * @param far Camera frustum far plane. Default `1000`.
-   * @param size Size of face of internal cubemap. Default `1024`.
+   * @param size Size of face of internal cubemap. Default `512`.
    */
-  constructor(near = 0.1, far = 1000, size = 1024) {
+  constructor(near = 0.1, far = 1000, size = 512) {
     super()
 
     /*
@@ -80,7 +81,10 @@ export class DomeMasterCamera extends Object3D {
       this.cameras[direction] = camera
 
       // Create render target
-      const renderTarget = new WebGLRenderTarget(size, size)
+      const renderTarget = new WebGLRenderTarget(size, size, {
+        minFilter: LinearFilter,
+        magFilter: LinearFilter,
+      })
       this.renderTargets[direction] = renderTarget
 
       // Create mesh to compose dome
