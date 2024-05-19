@@ -10,11 +10,11 @@
   },
   "devDependencies": {
     "@types/three": "^0.164.0",
-    "lil-gui": "^0.19.2",
     "typescript": "^5.0.2",
     "vite": "^4.3.9"
   },
   "dependencies": {
+    "lil-gui": "^0.19.2",
     "stats-js": "^1.0.1",
     "three": "^0.164.1"
   }
