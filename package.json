@@ -12,7 +12,7 @@
     "@types/node": "20.12.12",
     "@types/three": "0.164.0",
     "typescript": "5.0.2",
-    "vite": "4.3.9"
+    "vite": "4.5.3"
   },
   "dependencies": {
     "lil-gui": "0.19.2",
