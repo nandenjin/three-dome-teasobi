@@ -1,5 +1,6 @@
 import {
   BufferGeometry,
+  DoubleSide,
   Float32BufferAttribute,
   Group,
   LinearFilter,
@@ -9,6 +10,7 @@ import {
   OrthographicCamera,
   PerspectiveCamera,
   Scene,
+  Vector3,
   WebGLRenderTarget,
   WebGLRenderer,
 } from 'three'
@@ -23,7 +25,7 @@ export class DomeMasterCamera extends Object3D {
   /** Internal scene to render final result */
   private domeScene = new Scene()
   /** Internal camera to render final result */
-  private domeCamera = new OrthographicCamera(-1, 1, 1, -1, 0.1, 100)
+  private domeCamera = new OrthographicCamera(-0.5, 0.5, 0.5, -0.5, 0.1, 100)
 
   /**
    * @example
@@ -91,6 +93,7 @@ export class DomeMasterCamera extends Object3D {
       const cubeMapGeometry = createCubeMapGeometry(direction)
       const cubeMapMaterial = new MeshBasicMaterial({
         color: 0xffffff,
+        side: DoubleSide,
         map: renderTarget.texture,
       })
       const cubeMapMesh = new Mesh(cubeMapGeometry, cubeMapMaterial)
@@ -137,6 +140,9 @@ function createCubeMapGeometry(
   const indices = []
   for (let v = 0; v < resolution; v++) {
     for (let h = 0; h < resolution; h++) {
+      // Cut by horizontal line
+      if (direction !== 0 && h < resolution / 2) continue
+
       const index = v * (resolution + 1) + h
       indices.push(index, index + 1, index + resolution + 1)
       indices.push(index + 1, index + resolution + 2, index + resolution + 1)
@@ -151,37 +157,52 @@ function createCubeMapGeometry(
       const index = v * (resolution + 1) + h
       const UVu = v / resolution,
         UVv = h / resolution
-      const x = UVu * 2 - 1,
-        y = UVv * 2 - 1,
-        z = 1
-      const l = Math.sqrt(x * x + y * y + z * z)
-      vertices[index * 3 + 0] = x / l
-      vertices[index * 3 + 1] = y / l
-      vertices[index * 3 + 2] = z / l
-      uvs[index * 2 + 0] = 1 - UVu
+      const a = UVu * 2 - 1,
+        b = UVv * 2 - 1,
+        c = 1
+      const pos = new Vector3()
+      switch (direction) {
+        case 0: // +Y
+          pos.x = a
+          pos.y = c
+          pos.z = b
+          break
+        case 1: // +X
+          pos.x = c
+          pos.y = b
+          pos.z = a
+          break
+        case 2: // +Z
+          pos.x = -a
+          pos.y = b
+          pos.z = c
+          break
+        case 3: // -X
+          pos.x = -c
+          pos.y = b
+          pos.z = -a
+          break
+        case 4: // -Z
+          pos.x = a
+          pos.y = b
+          pos.z = -c
+          break
+      }
+
+      pos.normalize()
+
+      const theta = Math.acos(pos.y)
+      const phi = Math.atan2(pos.z, pos.x)
+
+      vertices[index * 3 + 0] = (theta / Math.PI) * Math.cos(phi)
+      vertices[index * 3 + 1] = 1
+      vertices[index * 3 + 2] = (theta / Math.PI) * Math.sin(phi)
+      uvs[index * 2 + 0] = UVu
       uvs[index * 2 + 1] = UVv
     }
   }
   geometry.setAttribute('position', new Float32BufferAttribute(vertices, 3))
   geometry.setAttribute('uv', new Float32BufferAttribute(uvs, 2))
-
-  switch (direction) {
-    case 1: // +X
-      geometry.rotateY(Math.PI / 2)
-      break
-    case 3: // -X
-      geometry.rotateY(-Math.PI / 2)
-      break
-    case 0: // +Y
-      geometry.rotateZ(Math.PI)
-      geometry.rotateX(-Math.PI / 2)
-      break
-    case 2: // +Z
-      break
-    case 4: // -Z
-      geometry.rotateY(Math.PI)
-      break
-  }
 
   return geometry
 }
