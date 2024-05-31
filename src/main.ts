@@ -92,6 +92,7 @@ function render() {
   renderer.setSize(size, size)
 
   domeCameraHelper.visible = !params.useDomemaster
+  domeCameraHelper.update()
 
   if (params.useDomemaster) {
     domeCamera.renderWith(scene, renderer)
